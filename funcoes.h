@@ -1,23 +1,22 @@
 #ifndef FUNCOES_H
 #define FUNCOES_H
 
-#include <stdbool.h>
-extern int *A, *B, *C;
-extern int posA, posB, posC;
+// --- Definições e Variáveis Globais ---
+// A struct é definida aqui para que funcoes.c e hanoi.c (se precisasse)
+// "saibam" como uma Torre é composta.
+typedef struct {
+    int *discos;
+    int pos;
+    char nome;
+} Torre;
+
+extern Torre torreA, torreB, torreC;
 extern int n;
-void pushA(int n);
-int  popA();
-int  peekA();
-void pushB(int n);
-int  popB();
-int  peekB();
-void pushC(int n);
-int  popC();
-int  peekC();
-bool is_move_valid(char origem, char destino);
-void execute_move(char origem, char destino);
-void show();
-void initialize(int quantidade);
-void cleanup();
+
+// --- Funções Públicas ---
+// As únicas 3 funções que main precisa chamar.
+void initialize_towers(int quantidade);
+void play_game();
+void cleanup_towers();
 
 #endif

@@ -1,52 +1,37 @@
 #include <stdio.h>
-#include <math.h>
+#include <ctype.h>
 #include "funcoes.h"
 
 int main() {
-    printf("Escolha a quantidade de discos (1 a 8): ");
-    if (scanf("%d", &n) != 1 || n < 1 || n > 8) {
-        printf("Número inválido. O programa será encerrado.\n");
-        return 1;
-    }
+    char jogar_novamente;
 
-    initialize(n);
-    int move_count = 0;
+    do {
+        // --- Início de uma nova partida ---
+        printf("Bem-vindo à Torre de Hanoi!\n");
+        printf("Escolha a quantidade de discos (1 a 8): ");
 
-    // Loop principal do jogo, continua enquanto a torre C não estiver completa
-    while (posC < n) {
-        show();
-        char origem, destino;
-
-        printf("Mover de qual torre para qual torre? (ex: A C): ");
-        if (scanf(" %c %c", &origem, &destino) != 2) {
-            printf("\n>> Entrada inválida! Use o formato 'Letra Letra'. <<\n");
-            while (getchar() != '\n'); // Limpa o buffer de entrada
-            continue;
+        int num_discos;
+        // Validação da entrada do usuário
+        if (scanf("%d", &num_discos) != 1 || num_discos < 1 || num_discos > 8) {
+            printf("Número inválido. Por favor, reinicie o programa e tente novamente.\n");
+            return 1;
         }
 
-        // A validação e a execução são delegadas às funções de funcoes.c
-        if (is_move_valid(origem, destino)) {
-            execute_move(origem, destino);
-            move_count++;
-        } else {
-            // A função is_move_valid já imprime a razão do erro.
-            printf(" Tente novamente.\n");
-        }
-    }
+        // Fase 1: Preparar o jogo
+        initialize_towers(num_discos);
 
-    // Mensagem de vitória
-    printf("\n*********************************************\n");
-    show();
-    printf("PARABENS! Voce resolveu a Torre de Hanoi! \n");
-    printf("Voce completou em %d movimentos.\n", move_count);
-    int min_moves = pow(2, n) - 1;
-    printf("O numero minimo de movimentos possivel era %d.\n", min_moves);
-    printf("*********************************************\n");
+        // Fase 2: Executar o jogo
+        play_game();
 
-    cleanup();
-    printf("\nPressione Enter para sair...");
-    while (getchar() != '\n');
-    getchar();
+        // Fase 3: Limpar a memória da partida atual
+        cleanup_towers();
+
+        printf("\n\nDeseja jogar novamente? (S/N): ");
+        scanf(" %c", &jogar_novamente);
+
+    } while (toupper(jogar_novamente) == 'S');
+
+    printf("\nObrigado por jogar! Até a próxima!\n");
 
     return 0;
 }
