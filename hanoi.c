@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "funcoes.h"
 
 int main() {
@@ -7,6 +8,7 @@ int main() {
 
     do {
         // --- Início de uma nova partida ---
+        system("cls");
         printf("Bem-vindo à Torre de Hanoi!\n");
         printf("Escolha a quantidade de discos (1 a 8): ");
 
