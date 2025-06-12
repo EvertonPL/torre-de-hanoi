@@ -1,12 +1,16 @@
 #ifndef FUNCOES_H
 #define FUNCOES_H
 
-// --- Definições e Variáveis Globais ---
-// A struct é definida aqui para que funcoes.c e hanoi.c (se precisasse)
-// "saibam" como uma Torre é composta.
+
+// struct do nó da pilha
+typedef struct Node {
+    int discos;
+    struct Node *prox;
+} Node;
+
+// struct da torre
 typedef struct {
-    int *discos;
-    int pos;
+    Node *top;
     char nome;
 } Torre;
 
@@ -15,8 +19,18 @@ extern int n;
 
 // --- Funções Públicas ---
 // As únicas 3 funções que main precisa chamar.
-void initialize_towers(int quantidade);
-void play_game();
-void cleanup_towers();
+void inicializar_torres(int quantidade);
+void iniciar_jogo();
+void limpar_torres();
+void mostrar_torres();
+int altura_torre(const Torre* torre);
+int disco_no_nivel(const Torre* torre, int nivel);
+int validar_movimento(Torre *origem, Torre *destino);
+void executar_movimento(Torre *origem, Torre *destino);
+Torre* torre_por_nome(char nome);
+void push(Torre *torre, int discos);
+int pop(Torre *torre);
+void liberar_pilha(Torre *torre);
+void imprimir_torre(const Torre* t, int nivel, int n_max);
 
 #endif

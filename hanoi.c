@@ -20,13 +20,13 @@ int main() {
         }
 
         // Fase 1: Preparar o jogo
-        initialize_towers(num_discos);
+        inicializar_torres(num_discos);
 
         // Fase 2: Executar o jogo
-        play_game();
+        iniciar_jogo();
 
         // Fase 3: Limpar a memória da partida atual
-        cleanup_towers();
+        limpar_torres();
 
         printf("\n\nDeseja jogar novamente? (S/N): ");
         scanf(" %c", &jogar_novamente);
