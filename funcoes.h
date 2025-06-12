@@ -20,7 +20,7 @@ extern int n;
 // --- Funções Públicas ---
 // As únicas 3 funções que main precisa chamar.
 void inicializar_torres(int quantidade);
-void iniciar_jogo();
+void iniciar_jogo(const char* nome_jogador, const char* data);
 void limpar_torres();
 void mostrar_torres();
 int altura_torre(const Torre* torre);

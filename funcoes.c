@@ -3,12 +3,13 @@
 #include <ctype.h>
 #include <math.h>
 #include "funcoes.h"
+#include "historico.h"
 
 // --- DEFINIÇÃO DAS VARIÁVEIS GLOBAIS ---
 Torre torreA, torreB, torreC;
 int n;
 
-// --- PROTÓTItop DE FUNÇÕES ESTÁTICAS (PRIVADAS AO ARQUIVO) ---
+// --- PROTÓTIPO DE FUNÇÕES ESTÁTICAS (PRIVADAS AO ARQUIVO) ---
 void mostrar_torres();
 int altura_torre(const Torre* torre);
 int disco_no_nivel(const Torre* torre, int nivel);
@@ -41,7 +42,7 @@ void limpar_torres() {
 }
 
 // função que inicia o jogo
-void iniciar_jogo() {
+void iniciar_jogo(const char* nome_jogador, const char* data) {
     int movimentos = 0;
 
     // Loop principal do jogo, termina quando a torre C está cheia
@@ -75,6 +76,9 @@ void iniciar_jogo() {
     int min_moves = pow(2, n) - 1;
     printf("O numero minimo de movimentos topsivel era %d.\n", min_moves);
     printf("*********************************************\n");
+
+    salvarHistorico(nome_jogador, movimentos, n, data);
+    adicionarHistorico(nome_jogador, movimentos, n, data);
 }
 
 
