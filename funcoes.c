@@ -2,28 +2,28 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
+#include <string.h>
 #include "funcoes.h"
 #include "historico.h"
 
-// --- DEFINIÇÃO DAS VARIÁVEIS GLOBAIS ---
+// ... (variáveis globais e protótipos estáticos permanecem os mesmos) ...
 Torre torreA, torreB, torreC;
 int n;
-
-// --- PROTÓTIPO DE FUNÇÕES ESTÁTICAS (PRIVADAS AO ARQUIVO) ---
-void mostrar_torres();
-int altura_torre(const Torre* torre);
-int disco_no_nivel(const Torre* torre, int nivel);
-int validar_movimento(Torre *origem, Torre *destino);
-void executar_movimento(Torre *origem, Torre *destino);
-Torre* torre_por_nome(char nome);
-void push(Torre *torre, int discos);
-int pop(Torre *torre);
-void liberar_pilha(Torre *torre);
-void imprimir_torre(const Torre* t, int level, int n_max);
+static void mostrar_torres();
+static int altura_torre(const Torre* torre);
+static int disco_no_nivel(const Torre* torre, int nivel);
+static int validar_movimento(Torre *origem, Torre *destino);
+static void executar_movimento(Torre *origem, Torre *destino);
+static Torre* torre_por_nome(char nome);
+static void push(Torre *torre, int discos);
+static int pop(Torre *torre);
+static void liberar_pilha(Torre *torre);
+static void imprimir_torre(const Torre* t, int level, int n_max);
 
 
-// --- IMPLEMENTAÇÃO DAS FUNÇÕES PÚBLICAS (Declaradas no .h) ---
+// --- IMPLEMENTAÇÃO DAS FUNÇÕES PÚBLICAS ---
 
+// FUNÇÃO SIMPLIFICADA: Apenas inicializa com a quantidade recebida.
 void inicializar_torres(int quantidade) {
     n = quantidade;
     torreA.top = NULL; torreA.nome = 'A';
@@ -41,19 +41,20 @@ void limpar_torres() {
     liberar_pilha(&torreC);
 }
 
-// função que inicia o jogo
+// FUNÇÃO SIMPLIFICADA: Apenas roda o jogo com os dados recebidos.
 void iniciar_jogo(const char* nome_jogador, const char* data) {
     int movimentos = 0;
 
-    // Loop principal do jogo, termina quando a torre C está cheia
+    // Loop principal do jogo
     while (altura_torre(&torreC) < n) {
+        system("cls || clear");
         mostrar_torres();
         char nome_origem, nome_destino;
 
         printf("Mover de qual torre para qual torre? (ex: A C): ");
         if (scanf(" %c %c", &nome_origem, &nome_destino) != 2) {
             printf("\n>> Entrada inválida! Use o formato 'Letra Letra'. <<\n");
-            while (getchar() != '\n'); // Limpa o buffer de entrada
+            while (getchar() != '\n');
             continue;
         }
 
@@ -64,17 +65,21 @@ void iniciar_jogo(const char* nome_jogador, const char* data) {
             executar_movimento(p_origem, p_destino);
             movimentos++;
         } else {
-            printf(" Tente novamente.\n");
+            printf("\n>> Tente novamente! <<\n");
+            printf("Pressione Enter para continuar...");
+            while(getchar() != '\n');
+            getchar();
         }
     }
 
     // Mensagem de vitória
+    system("cls || clear");
     printf("\n*********************************************\n");
     mostrar_torres();
-    printf("PARABENS! Voce resolveu a Torre de Hanoi! \n");
+    printf("PARABENS, %sVoce resolveu a Torre de Hanoi! \n", nome_jogador);
     printf("Voce completou em %d movimentos.\n", movimentos);
     int min_moves = pow(2, n) - 1;
-    printf("O numero minimo de movimentos topsivel era %d.\n", min_moves);
+    printf("O numero minimo de movimentos possivel era %d.\n", min_moves);
     printf("*********************************************\n");
 
     salvarHistorico(nome_jogador, movimentos, n, data);
@@ -82,36 +87,91 @@ void iniciar_jogo(const char* nome_jogador, const char* data) {
 }
 
 
-// --- IMPLEMENTAÇÃO DAS FUNÇÕES ESTÁTICAS (PRIVADAS) ---
+// --- FUNÇÕES DE MENU ---
 
-void push(Torre *torre, int discos) {
+void mostrar_menu() {
+    system("cls || clear");
+    printf("=============================\n");
+    printf("      TORRE DE HANOI\n");
+    printf("=============================\n");
+    printf("1. Iniciar Jogo\n");
+    printf("2. Estatisticas (Historico)\n");
+    printf("3. Regras do Jogo\n");
+    printf("4. Sair\n");
+    printf("=============================\n");
+}
+
+void lidar_com_estatisticas() {
+    system("cls || clear");
+    printf("== ESTATISTICAS E HISTORICO ==\n");
+    mostrarHistorico();
+
+    printf("\nDeseja buscar um historico especifico?\n");
+    printf(" (U) por Usuario\n");
+    printf(" (D) por Data\n");
+    printf(" (Qualquer outra tecla para voltar)\n");
+    printf("Sua escolha: ");
+
+    char busca_tipo;
+    scanf(" %c", &busca_tipo);
+    while (getchar() != '\n'); // Limpa buffer
+
+    if (toupper(busca_tipo) == 'U') {
+        char nome_busca[100];
+        printf("Digite o nome do jogador para buscar: ");
+        fgets(nome_busca, sizeof(nome_busca), stdin);
+        buscarUsuario(nome_busca);
+    } else if (toupper(busca_tipo) == 'D') {
+        char data_busca[11];
+        printf("Digite a data para buscar (dd/mm/aaaa): ");
+        fgets(data_busca, sizeof(data_busca), stdin);
+        buscarData(data_busca);
+    }
+}
+
+void mostrar_regras() {
+    system("cls || clear");
+    printf("=============================\n");
+    printf("       REGRAS DO JOGO\n");
+    printf("=============================\n");
+    printf("O objetivo e mover todos os discos da torre A para a torre C.\n\n");
+    printf("Siga estas regras:\n");
+    printf("1. Mova apenas um disco por vez.\n");
+    printf("2. Um disco maior nunca pode ser colocado sobre um disco menor.\n");
+    printf("3. Voce pode usar a torre B como auxiliar para os movimentos.\n");
+    printf("=============================\n");
+}
+
+
+// --- IMPLEMENTAÇÃO DAS FUNÇÕES ESTÁTICAS (PRIVADAS) ---
+// (Todas as suas funções static, como push, pop, mostrar_torres, etc. continuam aqui)
+// ... (O resto do arquivo é igual ao anterior)
+static void push(Torre *torre, int discos) {
     Node *novo = malloc(sizeof(Node));
+    if (!novo) return;
     novo->discos = discos;
     novo->prox = torre->top;
     torre->top = novo;
 }
 
-int pop(Torre *torre) {
+static int pop(Torre *torre) {
     if(torre->top) {
-    Node *top_atual = torre->top;
-    int valor = top_atual->discos;
-    torre->top = top_atual->prox;
-    free(top_atual);
-    return valor;
+        Node *top_atual = torre->top;
+        int valor = top_atual->discos;
+        torre->top = top_atual->prox;
+        free(top_atual);
+        return valor;
+    }
+    return 0;
+}
+
+static void liberar_pilha(Torre *torre) {
+    while (torre->top != NULL) {
+        pop(torre);
     }
 }
 
-void liberar_pilha(Torre *torre) {
-    Node *atual = torre->top;
-    while (atual) {
-        Node *prox = atual->prox;
-        free(atual);
-        atual = prox;
-    }
-    torre->top = NULL;
-}
-
-void imprimir_torre(const Torre* t, int nivel, int n_max) {
+static void imprimir_torre(const Torre* t, int nivel, int n_max) {
     int largura_torre = 2 * n_max - 1;
     int disco = disco_no_nivel(t, nivel);
     if (disco > 0) {
@@ -127,7 +187,7 @@ void imprimir_torre(const Torre* t, int nivel, int n_max) {
     }
 }
 
-void mostrar_torres() {
+static void mostrar_torres() {
     printf("\n");
     for (int i = n - 1; i >= 0; i--) {
         imprimir_torre(&torreA, i, n);
@@ -138,21 +198,21 @@ void mostrar_torres() {
         printf("\n");
     }
     int largura_torre = 2 * n - 1;
-    for (int i = 0; i < 3; i++) {
+    for (int t = 0; t < 3; t++) {
         for (int j = 0; j < largura_torre; j++) { printf("="); }
-        if (i < 2) { printf("   "); }
+        if (t < 2) { printf("   "); }
     }
     printf("\n");
-    for (int i = 0; i < 3; i++) {
+    for (int t = 0; t < 3; t++) {
         for (int j = 0; j < n - 1; j++) { printf(" "); }
-        printf("%c", 'A' + i);
-        for (int i = 0; i < n - 1; i++) { printf(" "); }
-        if (i < 2) { printf("   "); }
+        printf("%c", 'A' + t);
+        for (int j = 0; j < n - 1; j++) { printf(" "); }
+        if (t < 2) { printf("   "); }
     }
     printf("\n\n");
 }
 
-Torre* torre_por_nome(char nome) {
+static Torre* torre_por_nome(char nome) {
     switch (nome) {
         case 'A': return &torreA;
         case 'B': return &torreB;
@@ -161,32 +221,32 @@ Torre* torre_por_nome(char nome) {
     }
 }
 
-int validar_movimento(Torre *origem, Torre *destino) {
+static int validar_movimento(Torre *origem, Torre *destino) {
     if (!origem || !destino) {
-        printf("\n>> MOVIMENTO INVÁLIDO: Torre não existe. Use A, B ou C.");
+        printf("\n>> MOVIMENTO INVALIDO: Torre nao existe. Use A, B ou C.");
         return 0;
     }
     if (origem == destino) {
-        printf("\n>> MOVIMENTO INVÁLIDO: As torres de origem e destino devem ser diferentes.");
+        printf("\n>> MOVIMENTO INVALIDO: As torres de origem e destino devem ser diferentes.");
         return 0;
     }
     if (origem->top == NULL) {
-        printf("\n>> MOVIMENTO INVÁLIDO: A torre de origem '%c' está vazia.", origem->nome);
+        printf("\n>> MOVIMENTO INVALIDO: A torre de origem '%c' esta vazia.", origem->nome);
         return 0;
     }
     if (destino->top != NULL && origem->top->discos > destino->top->discos) {
-        printf("\n>> MOVIMENTO INVÁLIDO: Não é topsível colocar um discos maior sobre um menor.");
+        printf("\n>> MOVIMENTO INVALIDO: Nao e possivel colocar um disco maior sobre um menor.");
         return 0;
     }
     return 1;
 }
 
-void executar_movimento(Torre *origem, Torre *destino) {
+static void executar_movimento(Torre *origem, Torre *destino) {
     int discos = pop(origem);
     push(destino, discos);
 }
 
-int altura_torre(const Torre* torre) {
+static int altura_torre(const Torre* torre) {
     int altura = 0;
     Node *atual = torre->top;
     while (atual) {
@@ -196,16 +256,13 @@ int altura_torre(const Torre* torre) {
     return altura;
 }
 
-int disco_no_nivel(const Torre* torre, int nivel) {
+static int disco_no_nivel(const Torre* torre, int nivel) {
     int altura = altura_torre(torre);
-    int index = altura - nivel - 1;
+    if (nivel >= altura) return 0;
+    int index_reverso = altura - 1 - nivel;
     Node *atual = torre->top;
-    int i = 0;
-    while (atual) {
-        if (i == index) 
-            return atual->discos;
-        atual = atual->prox;
-        i++;
+    for (int i = 0; i < index_reverso; i++) {
+        if(atual) atual = atual->prox;
     }
-    return 0;
+    return atual ? atual->discos : 0;
 }

@@ -1,72 +1,91 @@
 #include <stdio.h>
-#include <ctype.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "funcoes.h"
 #include "historico.h"
+
+// Protótipos das funções de menu
+void mostrar_menu();
+void lidar_com_estatisticas();
+void mostrar_regras();
 
 int main() {
     carregarHistorico();
 
-    char jogar_novamente;
+    int opcao;
 
-    do {
-        // --- Início de uma nova partida ---
-        system("cls");
-        printf("Bem-vindo à Torre de Hanoi!\n");
-        printf("Digite seu nome: ");
-        char nome_jogador[100];
-        fgets(nome_jogador, sizeof(nome_jogador), stdin);
-        printf("Digite a data(dd/mm/aaaa): ");
-        char data[11];
-        fgets(data, sizeof(data), stdin);
-        printf("Escolha a quantidade de discos (1 a 8): ");
-
-        int num_discos;
-        // Validação da entrada do usuário
-        if (scanf("%d", &num_discos) != 1 || num_discos < 1 || num_discos > 8) {
-            printf("Número inválido. Por favor, reinicie o programa e tente novamente.\n");
-            return 1;
+    while (1) {
+        mostrar_menu();
+        printf("Escolha uma opção: ");
+        if (scanf("%d", &opcao) != 1) {
+            while (getchar() != '\n');
+            opcao = 0;
         }
 
-        // Fase 1: Preparar o jogo
-        inicializar_torres(num_discos);
+        switch (opcao) {
+            case 1: {
+                char jogar_novamente; // <-- VARIÁVEL DE CONTROLE
 
-        // Fase 2: Executar o jogo
-        iniciar_jogo(nome_jogador, data);
+                // --- Laço DO-WHILE para permitir jogar novamente ---
+                do {
+                    system("cls || clear");
+                    printf("== INICIAR NOVO JOGO ==\n");
 
-        // Fase 3: Limpar a memória da partida atual
-        limpar_torres();
+                    char nome_jogador[100];
+                    char data[11];
+                    int num_discos;
 
-        printf("\nDeseja mostrar o histórico das partidas? (S/N): ");
-        char opcao;
-        scanf(" %c", &opcao);
-        while(getchar() != '\n');
-        if (toupper(opcao) == 'S') {
-            mostrarHistorico();
-            printf("Deseja buscar histórico por usuário (U) ou data (D)? Ou qualquer tecla para continuar: ");
-            char busca_tipo;
-            scanf(" %c", &busca_tipo);
-            while(getchar() != '\n');
+                    // Limpa o buffer de entrada antes de ler o nome do jogador
+                    while (getchar() != '\n');
 
-            if (toupper(busca_tipo) == 'U') {
-                char nome_busca[100];
-                printf("Digite o nome do jogador para buscar: ");
-                fgets(nome_busca, sizeof(nome_busca), stdin);
-                buscarUsuario(nome_busca);
-            } else if (toupper(busca_tipo) == 'D') {
-                char data_busca[11];
-                printf("Digite a data para buscar (dd/mm/aaaa): ");
-                fgets(data_busca, sizeof(data_busca), stdin);
-                buscarData(data_busca);
+                    printf("Digite seu nome: ");
+                    fgets(nome_jogador, sizeof(nome_jogador), stdin);
+
+                    printf("Digite a data (dd/mm/aaaa): ");
+                    fgets(data, sizeof(data), stdin);
+
+                    printf("Escolha a quantidade de discos (1 a 8): ");
+                    scanf("%d", &num_discos);
+                    if (num_discos < 1 || num_discos > 8) {
+                        printf("Número de discos inválido. O jogo começará com 3 discos.\n");
+                        num_discos = 3;
+                    }
+
+                    // Prepara e executa o jogo
+                    inicializar_torres(num_discos);
+                    iniciar_jogo(nome_jogador, data);
+                    limpar_torres();
+
+                    // --- Pergunta se o usuário quer jogar de novo ---
+                    printf("\n\nDeseja jogar outra partida? (S/N): ");
+                    scanf(" %c", &jogar_novamente); // O espaço antes de %c é importante
+
+                } while (toupper(jogar_novamente) == 'S'); // <-- CONDIÇÃO DO LAÇO
+
+                break; // Sai do case 1 e volta para o laço do menu
             }
+            case 2:
+                lidar_com_estatisticas();
+                break;
+            case 3:
+                mostrar_regras();
+                break;
+            case 4:
+                printf("\nObrigado por jogar! Até a próxima!\n");
+                return 0;
+            default:
+                printf("\nOpção inválida! Por favor, tente novamente.\n");
+                break;
         }
 
-        printf("\n\nDeseja jogar novamente? (S/N): ");
-        scanf(" %c", &jogar_novamente);
-
-    } while (toupper(jogar_novamente) == 'S');
-
-    printf("\nObrigado por jogar! Até a próxima!\n");
+        // Pausa para o usuário ler a tela antes de voltar ao menu
+        if (opcao != 4) {
+            printf("\nPressione Enter para voltar ao menu...");
+             // Garante que o buffer esteja limpo antes de esperar pelo Enter
+            while(getchar() != '\n');
+            getchar();
+        }
+    }
 
     return 0;
 }
